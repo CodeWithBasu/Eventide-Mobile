@@ -4,6 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 import { Calendar } from 'react-native-calendars';
 import { MotiView } from 'moti';
+import { BlurView } from 'expo-blur';
 import { useColorScheme } from 'nativewind';
 import ThemeToggle from '../components/ThemeToggle';
 
@@ -216,6 +217,27 @@ export default function CalendarScreen({ navigation }) {
       </View>
 
       <View className="flex-1 relative overflow-hidden">
+        {/* Animated Blur Layer */}
+        {rippleTheme && (
+          <MotiView
+            from={{ opacity: 0 }}
+            animate={{ opacity: rippleActive ? 1 : 0 }}
+            transition={{ type: 'timing', duration: rippleActive ? 250 : 150 }}
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              zIndex: 9998,
+              pointerEvents: 'none',
+            }}
+          >
+            <BlurView intensity={25} style={{ flex: 1 }} tint={rippleTheme === 'dark' ? 'dark' : 'light'} />
+          </MotiView>
+        )}
+
+        {/* Diagonal Wipe */}
         {rippleTheme && (
           <MotiView
             from={{ translateX: 2000, translateY: -2000, rotate: '45deg', opacity: 1 }}

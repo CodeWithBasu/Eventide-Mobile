@@ -118,23 +118,37 @@ export default function CalendarScreen({ navigation }) {
     }
   };
 
+  // Helper to convert Next.js date format to ISO format
+  const getIsoDate = (monthStr, dayNum) => {
+    const monthMap = {
+      "January": "01", "February": "02", "March": "03", "April": "04",
+      "May": "05", "June": "06", "July": "07", "August": "08",
+      "September": "09", "October": "10", "November": "11", "December": "12"
+    };
+    const mm = monthMap[monthStr] || "01";
+    const dd = String(dayNum).padStart(2, '0');
+    // Using current year for this project
+    return `${new Date().getFullYear()}-${mm}-${dd}`;
+  };
+
   // Generate dots for the calendar
   const markedDates = {
     [selectedDate]: { selected: true, selectedColor: '#3b82f6' }
   };
   events.forEach(event => {
-    if (event.date) {
-      if (!markedDates[event.date]) {
-        markedDates[event.date] = { marked: true, dotColor: '#ec4899' };
-      } else if (event.date !== selectedDate) {
-        markedDates[event.date].marked = true;
-        markedDates[event.date].dotColor = '#ec4899';
+    if (event.month && event.startDay) {
+      const isoDate = getIsoDate(event.month, event.startDay);
+      if (!markedDates[isoDate]) {
+        markedDates[isoDate] = { marked: true, dotColor: '#ec4899' };
+      } else if (isoDate !== selectedDate) {
+        markedDates[isoDate].marked = true;
+        markedDates[isoDate].dotColor = '#ec4899';
       }
     }
   });
 
   // Filter events for the selected day
-  const filteredEvents = events.filter(e => e.date === selectedDate);
+  const filteredEvents = events.filter(e => getIsoDate(e.month, e.startDay) === selectedDate);
 
   const renderEvent = ({ item }) => {
     const isSaved = savedEventIds.includes(item.id);

@@ -203,6 +203,34 @@ export default function CalendarScreen({ navigation }) {
     );
   }
 
+  const commonCalendarProps = {
+    current: selectedDate,
+    onDayPress: (day) => setSelectedDate(day.dateString),
+    markedDates: markedDates
+  };
+
+  const getCalendarTheme = (forDark) => ({
+    backgroundColor: forDark ? '#18181b' : '#ffffff',
+    calendarBackground: forDark ? '#18181b' : '#ffffff',
+    textSectionTitleColor: forDark ? '#a1a1aa' : '#64748b',
+    selectedDayBackgroundColor: '#3b82f6',
+    selectedDayTextColor: '#ffffff',
+    todayTextColor: '#3b82f6',
+    dayTextColor: forDark ? '#e4e4e7' : '#0f172a',
+    textDisabledColor: forDark ? '#3f3f46' : '#cbd5e1',
+    dotColor: '#ec4899',
+    selectedDotColor: '#ffffff',
+    arrowColor: '#3b82f6',
+    monthTextColor: forDark ? '#ffffff' : '#0f172a',
+    indicatorColor: '#3b82f6',
+    textDayFontWeight: '500',
+    textMonthFontWeight: 'bold',
+    textDayHeaderFontWeight: '600',
+    textDayFontSize: 16,
+    textMonthFontSize: 18,
+    textDayHeaderFontSize: 14
+  });
+
   return (
     <View className="flex-1 bg-slate-50 dark:bg-zinc-950">
       <View className="flex-row justify-between items-center px-4 pt-6 pb-4 bg-teal-600 dark:bg-teal-900 border-b border-teal-700 dark:border-teal-950">
@@ -252,35 +280,12 @@ export default function CalendarScreen({ navigation }) {
         >
           <View className="px-4 py-4">
             <View className="rounded-2xl overflow-hidden border border-slate-200 dark:border-zinc-800 shadow-sm">
-              <Calendar
-                key={colorScheme}
-                current={selectedDate}
-                onDayPress={(day) => {
-                  setSelectedDate(day.dateString);
-                }}
-                markedDates={markedDates}
-                theme={{
-                  backgroundColor: isDark ? '#18181b' : '#ffffff',
-                  calendarBackground: isDark ? '#18181b' : '#ffffff',
-                  textSectionTitleColor: isDark ? '#a1a1aa' : '#64748b',
-                  selectedDayBackgroundColor: '#3b82f6',
-                  selectedDayTextColor: '#ffffff',
-                  todayTextColor: '#3b82f6',
-                  dayTextColor: isDark ? '#e4e4e7' : '#0f172a',
-                  textDisabledColor: isDark ? '#3f3f46' : '#cbd5e1',
-                  dotColor: '#ec4899',
-                  selectedDotColor: '#ffffff',
-                  arrowColor: '#3b82f6',
-                  monthTextColor: isDark ? '#ffffff' : '#0f172a',
-                  indicatorColor: '#3b82f6',
-                  textDayFontWeight: '500',
-                  textMonthFontWeight: 'bold',
-                  textDayHeaderFontWeight: '600',
-                  textDayFontSize: 16,
-                  textMonthFontSize: 18,
-                  textDayHeaderFontSize: 14
-                }}
-              />
+              <View style={{ display: isDark ? 'none' : 'flex' }}>
+                <Calendar {...commonCalendarProps} theme={getCalendarTheme(false)} />
+              </View>
+              <View style={{ display: isDark ? 'flex' : 'none' }}>
+                <Calendar {...commonCalendarProps} theme={getCalendarTheme(true)} />
+              </View>
             </View>
           </View>
 

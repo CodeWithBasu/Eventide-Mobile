@@ -171,6 +171,7 @@ export default function CalendarScreen({ navigation }) {
             </Text>
           </View>
         </View>
+        </View>
       </MotiView>
     );
   };

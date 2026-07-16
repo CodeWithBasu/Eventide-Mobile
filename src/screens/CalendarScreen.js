@@ -188,11 +188,11 @@ export default function CalendarScreen({ navigation }) {
 
   return (
     <View className="flex-1 bg-slate-50 dark:bg-zinc-950">
-      <View className="flex-row justify-between items-center px-4 pt-6 pb-4 bg-white dark:bg-zinc-900 border-b border-slate-200 dark:border-zinc-800">
-        <Text className="text-slate-900 dark:text-white text-2xl font-extrabold tracking-tight">Eventide</Text>
+      <View className="flex-row justify-between items-center px-4 pt-6 pb-4 bg-teal-600 dark:bg-teal-900 border-b border-teal-700 dark:border-teal-950">
+        <Text className="text-white text-2xl font-extrabold tracking-tight">Eventide</Text>
         <View className="flex-row items-center">
-          <TouchableOpacity onPress={handleLogout} className="bg-slate-100 dark:bg-zinc-800 px-4 py-2 rounded-lg border border-slate-200 dark:border-zinc-700">
-            <Text className="text-slate-600 dark:text-zinc-300 font-semibold">Logout</Text>
+          <TouchableOpacity onPress={handleLogout} className="bg-teal-700 dark:bg-teal-950 px-4 py-2 rounded-lg border border-teal-500 dark:border-teal-800">
+            <Text className="text-teal-50 font-semibold">Logout</Text>
           </TouchableOpacity>
           <ThemeToggle />
         </View>

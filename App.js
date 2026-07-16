@@ -59,9 +59,7 @@ export default function App() {
           name="Calendar" 
           component={CalendarScreen} 
           options={{ 
-            title: 'Eventide',
-            headerBackVisible: false,
-            headerTitleStyle: { fontWeight: 'bold' }
+            headerShown: false
           }} 
         />
       </Stack.Navigator>

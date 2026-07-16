@@ -218,22 +218,27 @@ export default function CalendarScreen({ navigation }) {
       <View className="flex-1 relative overflow-hidden">
         {rippleTheme && (
           <MotiView
-            from={{ scale: 0, opacity: 1 }}
+            from={{ translateX: 2000, translateY: -2000, rotate: '45deg', opacity: 1 }}
             animate={{ 
-              scale: rippleActive ? 200 : 0, 
+              translateX: rippleActive ? 0 : 2000, 
+              translateY: rippleActive ? 0 : -2000, 
+              rotate: '45deg',
               opacity: rippleActive ? 1 : 0 
             }}
             transition={{
-              scale: { type: 'timing', duration: 450 },
-              opacity: { type: 'timing', duration: rippleActive ? 0 : 200 }
+              translateX: { type: 'timing', duration: rippleActive ? 450 : 0 },
+              translateY: { type: 'timing', duration: rippleActive ? 450 : 0 },
+              opacity: { type: 'timing', duration: rippleActive ? 0 : 150 },
+              rotate: { type: 'timing', duration: 0 }
             }}
             style={{
               position: 'absolute',
-              top: -20,
-              right: 20,
-              width: 30,
-              height: 30,
-              borderRadius: 15,
+              top: '50%',
+              left: '50%',
+              width: 3000,
+              height: 3000,
+              marginLeft: -1500,
+              marginTop: -1500,
               backgroundColor: rippleTheme === 'dark' ? '#09090b' : '#f8fafc',
               zIndex: 9999,
               pointerEvents: 'none',

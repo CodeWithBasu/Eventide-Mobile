@@ -9,7 +9,7 @@ export default function LoginScreen({ navigation, onLoginSuccess }) {
 
   const handleLogin = async () => {
     if (!email || !password) {
-      Alert.alert('Error', 'Please enter both email and password.');
+      alert('Please enter both email and password.');
       return;
     }
 
@@ -31,11 +31,11 @@ export default function LoginScreen({ navigation, onLoginSuccess }) {
           navigation.replace('Home');
         }
       } else {
-        Alert.alert('Login Failed', data.error || 'Invalid credentials');
+        alert(data.error || 'Invalid credentials');
       }
     } catch (error) {
       console.error(error);
-      Alert.alert('Error', 'Could not connect to the server.');
+      alert('Could not connect to the server. Please try again.');
     } finally {
       setIsLoading(false);
     }

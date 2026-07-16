@@ -1,5 +1,5 @@
 import React from 'react';
-import { Pressable } from 'react-native';
+import { Pressable, View } from 'react-native';
 import { MotiView } from 'moti';
 import { Sun, Moon } from 'lucide-react-native';
 import { useColorScheme } from 'nativewind';
@@ -10,21 +10,21 @@ export default function ThemeToggle() {
 
   return (
     <Pressable onPress={toggleColorScheme} className="ml-4">
-      <MotiView
-        from={{ rotate: '0deg', scale: 1 }}
-        animate={{ 
-          rotate: isDark ? '180deg' : '0deg',
-          scale: isDark ? 1.1 : 1 
-        }}
-        transition={{ type: 'spring', damping: 15 }}
-        className="w-10 h-10 rounded-full items-center justify-center bg-blue-100 dark:bg-zinc-800"
-      >
-        {isDark ? (
-          <Moon size={20} color="#3b82f6" />
-        ) : (
-          <Sun size={20} color="#eab308" />
-        )}
-      </MotiView>
+      <View className={`w-16 h-8 rounded-full flex-row items-center px-1 border ${isDark ? 'bg-zinc-800 border-zinc-700' : 'bg-slate-200 border-slate-300'}`}>
+        <MotiView
+          animate={{
+            translateX: isDark ? 32 : 0,
+          }}
+          transition={{ type: 'spring', damping: 20, stiffness: 200 }}
+          className={`w-6 h-6 rounded-full items-center justify-center shadow-sm ${isDark ? 'bg-zinc-950' : 'bg-white'}`}
+        >
+          {isDark ? (
+            <Moon size={14} color="#3b82f6" />
+          ) : (
+            <Sun size={14} color="#eab308" />
+          )}
+        </MotiView>
+      </View>
     </Pressable>
   );
 }

@@ -205,6 +205,7 @@ export default function CalendarScreen({ navigation }) {
         <View className="px-4 py-4">
           <View className="rounded-2xl overflow-hidden border border-slate-200 dark:border-zinc-800 shadow-sm">
             <Calendar
+              key={colorScheme}
               current={selectedDate}
               onDayPress={(day) => {
                 setSelectedDate(day.dateString);

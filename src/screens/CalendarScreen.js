@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, FlatList, TouchableOpacity, RefreshControl, ActivityIndicator, Alert, Modal, TextInput, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 import { Calendar } from 'react-native-calendars';
+import { MotiView } from 'moti';
 
 export default function CalendarScreen({ navigation }) {
   const [events, setEvents] = useState([]);
@@ -150,10 +150,15 @@ export default function CalendarScreen({ navigation }) {
   // Filter events for the selected day
   const filteredEvents = events.filter(e => getIsoDate(e.month, e.startDay) === selectedDate);
 
-  const renderEvent = ({ item }) => {
+  const renderEvent = ({ item, index }) => {
     const isSaved = savedEventIds.includes(item.id);
     return (
-      <View className="bg-zinc-800 p-4 rounded-xl mb-4 border border-zinc-700 flex-row justify-between items-center">
+      <MotiView
+        from={{ opacity: 0, translateY: 20 }}
+        animate={{ opacity: 1, translateY: 0 }}
+        transition={{ type: 'timing', duration: 350, delay: index * 100 }}
+      >
+        <View className="bg-zinc-800 p-4 rounded-xl mb-4 border border-zinc-700 flex-row justify-between items-center">
         <View className="flex-1 pr-4">
           <Text className="text-white font-bold text-lg mb-1">{item.name}</Text>
           <Text className="text-blue-400 font-medium mb-1">{item.time}</Text>
@@ -166,7 +171,7 @@ export default function CalendarScreen({ navigation }) {
             </Text>
           </View>
         </View>
-      </View>
+      </MotiView>
     );
   };
 
@@ -235,27 +240,38 @@ export default function CalendarScreen({ navigation }) {
               </Text>
               <Text className="text-zinc-400 mt-1">{filteredEvents.length} events found</Text>
             </View>
-            <TouchableOpacity 
-              onPress={() => setIsModalVisible(true)}
-              className="bg-blue-600 px-4 py-2 rounded-lg"
+            <MotiView
+              from={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ type: 'spring' }}
             >
-              <Text className="text-white font-bold">+ Add Event</Text>
-            </TouchableOpacity>
+              <TouchableOpacity 
+                onPress={() => setIsModalVisible(true)}
+                className="bg-blue-600 px-4 py-2 rounded-lg"
+              >
+                <Text className="text-white font-bold">+ Add Event</Text>
+              </TouchableOpacity>
+            </MotiView>
           </View>
 
           {filteredEvents.length > 0 ? (
-            filteredEvents.map((item) => (
+            filteredEvents.map((item, index) => (
               <View key={item.id}>
-                {renderEvent({ item })}
+                {renderEvent({ item, index })}
               </View>
             ))
           ) : (
-            <View className="bg-zinc-900 p-8 rounded-2xl border border-zinc-800 items-center justify-center mt-4">
+            <MotiView 
+              from={{ opacity: 0, translateY: 20 }}
+              animate={{ opacity: 1, translateY: 0 }}
+              transition={{ type: 'spring' }}
+              className="bg-zinc-900 p-8 rounded-2xl border border-zinc-800 items-center justify-center mt-4"
+            >
               <Text className="text-zinc-400 text-lg mb-4 text-center">No events scheduled for this day.</Text>
               <TouchableOpacity onPress={() => setIsModalVisible(true)} className="bg-zinc-800 px-6 py-3 rounded-xl border border-zinc-700">
                 <Text className="text-blue-400 font-bold">Create First Event</Text>
               </TouchableOpacity>
-            </View>
+            </MotiView>
           )}
         </View>
       </ScrollView>
@@ -272,9 +288,18 @@ export default function CalendarScreen({ navigation }) {
           className="flex-1 justify-end"
         >
           {/* Backdrop overlay */}
-          <View className="absolute inset-0 bg-black/60" />
+          <MotiView 
+            from={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="absolute inset-0 bg-black/60" 
+          />
           
-          <View className="bg-zinc-900 rounded-t-3xl p-6 border-t border-zinc-800">
+          <MotiView 
+            from={{ opacity: 0, translateY: 400 }}
+            animate={{ opacity: 1, translateY: 0 }}
+            transition={{ type: 'spring', damping: 20, stiffness: 200 }}
+            className="bg-zinc-900 rounded-t-3xl p-6 border-t border-zinc-800"
+          >
             <View className="flex-row justify-between items-center mb-6">
               <Text className="text-white text-2xl font-bold">Add New Event</Text>
               <TouchableOpacity onPress={() => setIsModalVisible(false)} className="bg-zinc-800 p-2 rounded-full">
@@ -321,7 +346,7 @@ export default function CalendarScreen({ navigation }) {
                 {isSubmitting ? 'Saving...' : 'Save Event'}
               </Text>
             </TouchableOpacity>
-          </View>
+          </MotiView>
         </KeyboardAvoidingView>
       </Modal>
     </View>

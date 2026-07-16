@@ -14,8 +14,25 @@ export default function CalendarScreen({ navigation }) {
   const [refreshing, setRefreshing] = useState(false);
   const [user, setUser] = useState(null);
   
-  const { colorScheme } = useColorScheme();
+  const { colorScheme, toggleColorScheme } = useColorScheme();
   const isDark = colorScheme === 'dark';
+
+  const [rippleActive, setRippleActive] = useState(false);
+  const [rippleTheme, setRippleTheme] = useState(null);
+
+  const handleThemeToggle = () => {
+    if (rippleActive) return;
+    const nextTheme = isDark ? 'light' : 'dark';
+    setRippleTheme(nextTheme);
+    setRippleActive(true);
+
+    setTimeout(() => {
+      toggleColorScheme();
+      setTimeout(() => {
+        setRippleActive(false);
+      }, 50);
+    }, 450);
+  };
 
   // Calendar State
   const today = new Date().toISOString().split('T')[0];
@@ -194,92 +211,119 @@ export default function CalendarScreen({ navigation }) {
           <TouchableOpacity onPress={handleLogout} className="bg-teal-700 dark:bg-teal-950 px-4 py-2 rounded-lg border border-teal-500 dark:border-teal-800">
             <Text className="text-teal-50 font-semibold">Logout</Text>
           </TouchableOpacity>
-          <ThemeToggle />
+          <ThemeToggle onPress={handleThemeToggle} />
         </View>
       </View>
 
-      <ScrollView 
-        className="flex-1"
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#3b82f6" />}
-      >
-        <View className="px-4 py-4">
-          <View className="rounded-2xl overflow-hidden border border-slate-200 dark:border-zinc-800 shadow-sm">
-            <Calendar
-              key={colorScheme}
-              current={selectedDate}
-              onDayPress={(day) => {
-                setSelectedDate(day.dateString);
-              }}
-              markedDates={markedDates}
-              theme={{
-                backgroundColor: isDark ? '#18181b' : '#ffffff',
-                calendarBackground: isDark ? '#18181b' : '#ffffff',
-                textSectionTitleColor: isDark ? '#a1a1aa' : '#64748b',
-                selectedDayBackgroundColor: '#3b82f6',
-                selectedDayTextColor: '#ffffff',
-                todayTextColor: '#3b82f6',
-                dayTextColor: isDark ? '#e4e4e7' : '#0f172a',
-                textDisabledColor: isDark ? '#3f3f46' : '#cbd5e1',
-                dotColor: '#ec4899',
-                selectedDotColor: '#ffffff',
-                arrowColor: '#3b82f6',
-                monthTextColor: isDark ? '#ffffff' : '#0f172a',
-                indicatorColor: '#3b82f6',
-                textDayFontWeight: '500',
-                textMonthFontWeight: 'bold',
-                textDayHeaderFontWeight: '600',
-                textDayFontSize: 16,
-                textMonthFontSize: 18,
-                textDayHeaderFontSize: 14
-              }}
-            />
-          </View>
-        </View>
+      <View className="flex-1 relative overflow-hidden">
+        {rippleTheme && (
+          <MotiView
+            from={{ scale: 0, opacity: 1 }}
+            animate={{ 
+              scale: rippleActive ? 200 : 0, 
+              opacity: rippleActive ? 1 : 0 
+            }}
+            transition={{
+              scale: { type: 'timing', duration: 450 },
+              opacity: { type: 'timing', duration: rippleActive ? 0 : 200 }
+            }}
+            style={{
+              position: 'absolute',
+              top: -20,
+              right: 20,
+              width: 30,
+              height: 30,
+              borderRadius: 15,
+              backgroundColor: rippleTheme === 'dark' ? '#09090b' : '#f8fafc',
+              zIndex: 9999,
+              pointerEvents: 'none',
+            }}
+          />
+        )}
 
-        <View className="px-4 pb-24">
-          <View className="flex-row justify-between items-end mb-4 mt-2">
-            <View>
-              <Text className="text-slate-900 dark:text-white text-xl font-bold">
-                {selectedDate === today ? 'Today\'s Events' : 'Events on ' + selectedDate}
-              </Text>
-              <Text className="text-slate-500 dark:text-zinc-400 mt-1">{filteredEvents.length} events found</Text>
+        <ScrollView 
+          className="flex-1"
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#3b82f6" />}
+        >
+          <View className="px-4 py-4">
+            <View className="rounded-2xl overflow-hidden border border-slate-200 dark:border-zinc-800 shadow-sm">
+              <Calendar
+                key={colorScheme}
+                current={selectedDate}
+                onDayPress={(day) => {
+                  setSelectedDate(day.dateString);
+                }}
+                markedDates={markedDates}
+                theme={{
+                  backgroundColor: isDark ? '#18181b' : '#ffffff',
+                  calendarBackground: isDark ? '#18181b' : '#ffffff',
+                  textSectionTitleColor: isDark ? '#a1a1aa' : '#64748b',
+                  selectedDayBackgroundColor: '#3b82f6',
+                  selectedDayTextColor: '#ffffff',
+                  todayTextColor: '#3b82f6',
+                  dayTextColor: isDark ? '#e4e4e7' : '#0f172a',
+                  textDisabledColor: isDark ? '#3f3f46' : '#cbd5e1',
+                  dotColor: '#ec4899',
+                  selectedDotColor: '#ffffff',
+                  arrowColor: '#3b82f6',
+                  monthTextColor: isDark ? '#ffffff' : '#0f172a',
+                  indicatorColor: '#3b82f6',
+                  textDayFontWeight: '500',
+                  textMonthFontWeight: 'bold',
+                  textDayHeaderFontWeight: '600',
+                  textDayFontSize: 16,
+                  textMonthFontSize: 18,
+                  textDayHeaderFontSize: 14
+                }}
+              />
             </View>
-            <MotiView
-              from={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ type: 'spring' }}
-            >
-              <TouchableOpacity 
-                onPress={() => setIsModalVisible(true)}
-                className="bg-blue-600 px-4 py-2 rounded-lg shadow-sm"
-              >
-                <Text className="text-white font-bold">+ Add Event</Text>
-              </TouchableOpacity>
-            </MotiView>
           </View>
 
-          {filteredEvents.length > 0 ? (
-            filteredEvents.map((item, index) => (
-              <View key={item.id}>
-                {renderEvent({ item, index })}
+          <View className="px-4 pb-24">
+            <View className="flex-row justify-between items-end mb-4 mt-2">
+              <View>
+                <Text className="text-slate-900 dark:text-white text-xl font-bold">
+                  {selectedDate === today ? 'Today\'s Events' : 'Events on ' + selectedDate}
+                </Text>
+                <Text className="text-slate-500 dark:text-zinc-400 mt-1">{filteredEvents.length} events found</Text>
               </View>
-            ))
-          ) : (
-            <MotiView 
-              from={{ opacity: 0, translateY: 20 }}
-              animate={{ opacity: 1, translateY: 0 }}
-              transition={{ type: 'spring' }}
-            >
-              <View className="bg-white dark:bg-zinc-900 p-8 rounded-2xl border border-slate-200 dark:border-zinc-800 items-center justify-center mt-4 shadow-sm">
-                <Text className="text-slate-500 dark:text-zinc-400 text-lg mb-4 text-center">No events scheduled for this day.</Text>
-                <TouchableOpacity onPress={() => setIsModalVisible(true)} className="bg-slate-100 dark:bg-zinc-800 px-6 py-3 rounded-xl border border-slate-200 dark:border-zinc-700">
-                  <Text className="text-blue-600 dark:text-blue-400 font-bold">Create First Event</Text>
+              <MotiView
+                from={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ type: 'spring' }}
+              >
+                <TouchableOpacity 
+                  onPress={() => setIsModalVisible(true)}
+                  className="bg-blue-600 px-4 py-2 rounded-lg shadow-sm"
+                >
+                  <Text className="text-white font-bold">+ Add Event</Text>
                 </TouchableOpacity>
-              </View>
-            </MotiView>
-          )}
-        </View>
-      </ScrollView>
+              </MotiView>
+            </View>
+
+            {filteredEvents.length > 0 ? (
+              filteredEvents.map((item, index) => (
+                <View key={item.id}>
+                  {renderEvent({ item, index })}
+                </View>
+              ))
+            ) : (
+              <MotiView 
+                from={{ opacity: 0, translateY: 20 }}
+                animate={{ opacity: 1, translateY: 0 }}
+                transition={{ type: 'spring' }}
+              >
+                <View className="bg-white dark:bg-zinc-900 p-8 rounded-2xl border border-slate-200 dark:border-zinc-800 items-center justify-center mt-4 shadow-sm">
+                  <Text className="text-slate-500 dark:text-zinc-400 text-lg mb-4 text-center">No events scheduled for this day.</Text>
+                  <TouchableOpacity onPress={() => setIsModalVisible(true)} className="bg-slate-100 dark:bg-zinc-800 px-6 py-3 rounded-xl border border-slate-200 dark:border-zinc-700">
+                    <Text className="text-blue-600 dark:text-blue-400 font-bold">Create First Event</Text>
+                  </TouchableOpacity>
+                </View>
+              </MotiView>
+            )}
+          </View>
+        </ScrollView>
+      </View>
 
       <Modal
         visible={isModalVisible}

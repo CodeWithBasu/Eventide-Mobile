@@ -4,13 +4,13 @@ import { MotiView } from 'moti';
 import Svg, { Path } from 'react-native-svg';
 import { useColorScheme } from 'nativewind';
 
-export default function ThemeToggle() {
+export default function ThemeToggle({ onPress }) {
   const { colorScheme, toggleColorScheme } = useColorScheme();
   const isDark = colorScheme === 'dark';
 
   return (
     <Pressable 
-      onPress={toggleColorScheme} 
+      onPress={onPress || toggleColorScheme} 
       className="ml-4 w-10 h-10 rounded-full bg-black items-center justify-center overflow-hidden"
     >
       {/* Outer Path (Rotates 0 -> 180) */}

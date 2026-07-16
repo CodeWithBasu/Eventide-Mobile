@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, FlatList, TouchableOpacity, RefreshControl, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, RefreshControl, ActivityIndicator, Alert, Modal, TextInput, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
+import { Calendar } from 'react-native-calendars';
 
 export default function CalendarScreen({ navigation }) {
   const [events, setEvents] = useState([]);
@@ -9,6 +10,17 @@ export default function CalendarScreen({ navigation }) {
   const [isLoading, setIsLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [user, setUser] = useState(null);
+  
+  // Calendar State
+  const today = new Date().toISOString().split('T')[0];
+  const [selectedDate, setSelectedDate] = useState(today);
+  
+  // Modal State
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [newEventName, setNewEventName] = useState('');
+  const [newEventTime, setNewEventTime] = useState('');
+  const [newEventDesc, setNewEventDesc] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const loadUserAndEvents = async () => {
     try {
@@ -17,7 +29,6 @@ export default function CalendarScreen({ navigation }) {
         navigation.replace('Login');
         return;
       }
-      
       const userData = JSON.parse(userStr);
       setUser(userData);
       await fetchEvents(userData.id);
@@ -35,7 +46,7 @@ export default function CalendarScreen({ navigation }) {
         setSavedEventIds(data.savedEventIds);
       }
     } catch (error) {
-      Alert.alert('Error', 'Failed to fetch events');
+      alert('Failed to fetch events');
     } finally {
       setIsLoading(false);
       setRefreshing(false);
@@ -58,13 +69,80 @@ export default function CalendarScreen({ navigation }) {
     navigation.replace('Login');
   };
 
+  const handleAddEvent = async () => {
+    if (!newEventName || !newEventTime) {
+      alert('Please enter an event name and time.');
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const d = new Date(selectedDate);
+      const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+      const monthName = monthNames[d.getMonth()];
+      const day = d.getDate();
+
+      const res = await fetch('https://eventide-calender.vercel.app/api/mobile/events', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: newEventName,
+          month: monthName,
+          startDay: day,
+          endDay: day,
+          category: 'Mobile',
+          color: 'blue',
+          startTime: newEventTime,
+          endTime: newEventTime,
+          tags: ['mobile'],
+          description: newEventDesc,
+          userId: user.id
+        })
+      });
+      const data = await res.json();
+      
+      if (data.success) {
+        alert('Event added successfully!');
+        setIsModalVisible(false);
+        setNewEventName('');
+        setNewEventTime('');
+        setNewEventDesc('');
+        if (user) fetchEvents(user.id);
+      } else {
+        alert(data.error || 'Failed to add event');
+      }
+    } catch (error) {
+      alert('Network error. Could not connect.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Generate dots for the calendar
+  const markedDates = {
+    [selectedDate]: { selected: true, selectedColor: '#3b82f6' }
+  };
+  events.forEach(event => {
+    if (event.date) {
+      if (!markedDates[event.date]) {
+        markedDates[event.date] = { marked: true, dotColor: '#ec4899' };
+      } else if (event.date !== selectedDate) {
+        markedDates[event.date].marked = true;
+        markedDates[event.date].dotColor = '#ec4899';
+      }
+    }
+  });
+
+  // Filter events for the selected day
+  const filteredEvents = events.filter(e => e.date === selectedDate);
+
   const renderEvent = ({ item }) => {
     const isSaved = savedEventIds.includes(item.id);
     return (
       <View className="bg-zinc-800 p-4 rounded-xl mb-4 border border-zinc-700 flex-row justify-between items-center">
         <View className="flex-1 pr-4">
           <Text className="text-white font-bold text-lg mb-1">{item.name}</Text>
-          <Text className="text-blue-400 font-medium mb-1">{item.date} • {item.time}</Text>
+          <Text className="text-blue-400 font-medium mb-1">{item.time}</Text>
           <Text className="text-zinc-400 text-sm" numberOfLines={2}>{item.description}</Text>
         </View>
         <View className="items-end">
@@ -80,33 +158,158 @@ export default function CalendarScreen({ navigation }) {
 
   if (isLoading) {
     return (
-      <View className="flex-1 justify-center items-center bg-zinc-900">
+      <View className="flex-1 justify-center items-center bg-zinc-950">
         <ActivityIndicator size="large" color="#3b82f6" />
       </View>
     );
   }
 
   return (
-    <View className="flex-1 bg-zinc-900 px-4 pt-4">
-      <View className="flex-row justify-between items-center mb-6">
-        <Text className="text-white text-3xl font-extrabold tracking-tight">Your Events</Text>
-        <TouchableOpacity onPress={handleLogout} className="bg-zinc-800 px-4 py-2 rounded-lg">
+    <View className="flex-1 bg-zinc-950">
+      {/* Header */}
+      <View className="flex-row justify-between items-center px-4 pt-6 pb-4 bg-zinc-900 border-b border-zinc-800">
+        <Text className="text-white text-2xl font-extrabold tracking-tight">Eventide</Text>
+        <TouchableOpacity onPress={handleLogout} className="bg-zinc-800 px-4 py-2 rounded-lg border border-zinc-700">
           <Text className="text-zinc-300 font-semibold">Logout</Text>
         </TouchableOpacity>
       </View>
 
-      <FlatList
-        data={events}
-        keyExtractor={(item) => item.id}
-        renderItem={renderEvent}
-        showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#3b82f6" />
-        }
-        ListEmptyComponent={
-          <Text className="text-zinc-500 text-center mt-10">No events found.</Text>
-        }
-      />
+      <ScrollView 
+        className="flex-1"
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#3b82f6" />}
+      >
+        {/* Calendar Widget */}
+        <View className="px-4 py-4">
+          <View className="rounded-2xl overflow-hidden border border-zinc-800">
+            <Calendar
+              current={selectedDate}
+              onDayPress={(day) => {
+                setSelectedDate(day.dateString);
+              }}
+              markedDates={markedDates}
+              theme={{
+                backgroundColor: '#18181b', // zinc-900
+                calendarBackground: '#18181b',
+                textSectionTitleColor: '#a1a1aa',
+                selectedDayBackgroundColor: '#3b82f6',
+                selectedDayTextColor: '#ffffff',
+                todayTextColor: '#3b82f6',
+                dayTextColor: '#e4e4e7',
+                textDisabledColor: '#3f3f46',
+                dotColor: '#ec4899',
+                selectedDotColor: '#ffffff',
+                arrowColor: '#3b82f6',
+                monthTextColor: '#ffffff',
+                indicatorColor: '#3b82f6',
+                textDayFontWeight: '500',
+                textMonthFontWeight: 'bold',
+                textDayHeaderFontWeight: '600',
+                textDayFontSize: 16,
+                textMonthFontSize: 18,
+                textDayHeaderFontSize: 14
+              }}
+            />
+          </View>
+        </View>
+
+        {/* Selected Day Events */}
+        <View className="px-4 pb-24">
+          <View className="flex-row justify-between items-end mb-4 mt-2">
+            <View>
+              <Text className="text-white text-xl font-bold">
+                {selectedDate === today ? 'Today\'s Events' : 'Events on ' + selectedDate}
+              </Text>
+              <Text className="text-zinc-400 mt-1">{filteredEvents.length} events found</Text>
+            </View>
+            <TouchableOpacity 
+              onPress={() => setIsModalVisible(true)}
+              className="bg-blue-600 px-4 py-2 rounded-lg"
+            >
+              <Text className="text-white font-bold">+ Add Event</Text>
+            </TouchableOpacity>
+          </View>
+
+          {filteredEvents.length > 0 ? (
+            filteredEvents.map((item) => (
+              <View key={item.id}>
+                {renderEvent({ item })}
+              </View>
+            ))
+          ) : (
+            <View className="bg-zinc-900 p-8 rounded-2xl border border-zinc-800 items-center justify-center mt-4">
+              <Text className="text-zinc-400 text-lg mb-4 text-center">No events scheduled for this day.</Text>
+              <TouchableOpacity onPress={() => setIsModalVisible(true)} className="bg-zinc-800 px-6 py-3 rounded-xl border border-zinc-700">
+                <Text className="text-blue-400 font-bold">Create First Event</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+        </View>
+      </ScrollView>
+
+      {/* Add Event Modal */}
+      <Modal
+        visible={isModalVisible}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setIsModalVisible(false)}
+      >
+        <KeyboardAvoidingView 
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          className="flex-1 justify-end"
+        >
+          {/* Backdrop overlay */}
+          <View className="absolute inset-0 bg-black/60" />
+          
+          <View className="bg-zinc-900 rounded-t-3xl p-6 border-t border-zinc-800">
+            <View className="flex-row justify-between items-center mb-6">
+              <Text className="text-white text-2xl font-bold">Add New Event</Text>
+              <TouchableOpacity onPress={() => setIsModalVisible(false)} className="bg-zinc-800 p-2 rounded-full">
+                <Text className="text-zinc-400 font-bold px-2">X</Text>
+              </TouchableOpacity>
+            </View>
+
+            <Text className="text-zinc-400 mb-2 font-semibold">Event Name</Text>
+            <TextInput
+              className="bg-zinc-950 text-white p-4 rounded-xl mb-4 border border-zinc-800"
+              placeholder="e.g. Project Meeting"
+              placeholderTextColor="#52525b"
+              value={newEventName}
+              onChangeText={setNewEventName}
+            />
+
+            <Text className="text-zinc-400 mb-2 font-semibold">Time</Text>
+            <TextInput
+              className="bg-zinc-950 text-white p-4 rounded-xl mb-4 border border-zinc-800"
+              placeholder="e.g. 10:00 AM"
+              placeholderTextColor="#52525b"
+              value={newEventTime}
+              onChangeText={setNewEventTime}
+            />
+
+            <Text className="text-zinc-400 mb-2 font-semibold">Description (Optional)</Text>
+            <TextInput
+              className="bg-zinc-950 text-white p-4 rounded-xl mb-6 border border-zinc-800"
+              placeholder="Add details here..."
+              placeholderTextColor="#52525b"
+              multiline
+              numberOfLines={3}
+              value={newEventDesc}
+              onChangeText={setNewEventDesc}
+              textAlignVertical="top"
+            />
+
+            <TouchableOpacity 
+              onPress={handleAddEvent}
+              disabled={isSubmitting}
+              className={`bg-blue-600 w-full py-4 rounded-xl items-center ${isSubmitting ? 'opacity-70' : ''}`}
+            >
+              <Text className="text-white font-bold text-lg">
+                {isSubmitting ? 'Saving...' : 'Save Event'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
     </View>
   );
 }

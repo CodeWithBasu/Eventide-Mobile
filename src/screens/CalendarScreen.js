@@ -31,7 +31,7 @@ export default function CalendarScreen({ navigation }) {
       setTimeout(() => {
         setRippleActive(false);
       }, 50);
-    }, 450);
+    }, 800);
   };
 
   // Calendar State
@@ -226,8 +226,8 @@ export default function CalendarScreen({ navigation }) {
               opacity: rippleActive ? 1 : 0 
             }}
             transition={{
-              translateX: { type: 'timing', duration: rippleActive ? 450 : 0 },
-              translateY: { type: 'timing', duration: rippleActive ? 450 : 0 },
+              translateX: { type: 'timing', duration: rippleActive ? 800 : 0 },
+              translateY: { type: 'timing', duration: rippleActive ? 800 : 0 },
               opacity: { type: 'timing', duration: rippleActive ? 0 : 150 },
               rotate: { type: 'timing', duration: 0 }
             }}

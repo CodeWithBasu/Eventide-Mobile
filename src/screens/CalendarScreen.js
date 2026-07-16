@@ -267,12 +267,13 @@ export default function CalendarScreen({ navigation }) {
               from={{ opacity: 0, translateY: 20 }}
               animate={{ opacity: 1, translateY: 0 }}
               transition={{ type: 'spring' }}
-              className="bg-zinc-900 p-8 rounded-2xl border border-zinc-800 items-center justify-center mt-4"
             >
-              <Text className="text-zinc-400 text-lg mb-4 text-center">No events scheduled for this day.</Text>
-              <TouchableOpacity onPress={() => setIsModalVisible(true)} className="bg-zinc-800 px-6 py-3 rounded-xl border border-zinc-700">
-                <Text className="text-blue-400 font-bold">Create First Event</Text>
-              </TouchableOpacity>
+              <View className="bg-zinc-900 p-8 rounded-2xl border border-zinc-800 items-center justify-center mt-4">
+                <Text className="text-zinc-400 text-lg mb-4 text-center">No events scheduled for this day.</Text>
+                <TouchableOpacity onPress={() => setIsModalVisible(true)} className="bg-zinc-800 px-6 py-3 rounded-xl border border-zinc-700">
+                  <Text className="text-blue-400 font-bold">Create First Event</Text>
+                </TouchableOpacity>
+              </View>
             </MotiView>
           )}
         </View>
@@ -293,16 +294,16 @@ export default function CalendarScreen({ navigation }) {
           <MotiView 
             from={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="absolute inset-0 bg-black/60" 
+            style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.6)' }}
           />
           
           <MotiView 
             from={{ opacity: 0, translateY: 400 }}
             animate={{ opacity: 1, translateY: 0 }}
             transition={{ type: 'spring', damping: 20, stiffness: 200 }}
-            className="bg-zinc-900 rounded-t-3xl p-6 border-t border-zinc-800"
           >
-            <View className="flex-row justify-between items-center mb-6">
+            <View className="bg-zinc-900 rounded-t-3xl p-6 border-t border-zinc-800">
+              <View className="flex-row justify-between items-center mb-6">
               <Text className="text-white text-2xl font-bold">Add New Event</Text>
               <TouchableOpacity onPress={() => setIsModalVisible(false)} className="bg-zinc-800 p-2 rounded-full">
                 <Text className="text-zinc-400 font-bold px-2">X</Text>
@@ -348,6 +349,7 @@ export default function CalendarScreen({ navigation }) {
                 {isSubmitting ? 'Saving...' : 'Save Event'}
               </Text>
             </TouchableOpacity>
+            </View>
           </MotiView>
         </KeyboardAvoidingView>
       </Modal>

@@ -17,21 +17,26 @@ export default function CalendarScreen({ navigation }) {
   const { colorScheme, toggleColorScheme } = useColorScheme();
   const isDark = colorScheme === 'dark';
 
-  const [rippleActive, setRippleActive] = useState(false);
+  const [ripplePhase, setRipplePhase] = useState('idle'); // 'idle' | 'wiping_in' | 'wiping_out'
   const [rippleTheme, setRippleTheme] = useState(null);
 
   const handleThemeToggle = () => {
-    if (rippleActive) return;
+    if (ripplePhase !== 'idle') return;
     const nextTheme = isDark ? 'light' : 'dark';
     setRippleTheme(nextTheme);
-    setRippleActive(true);
+    setRipplePhase('wiping_in');
+  };
 
-    setTimeout(() => {
-      toggleColorScheme();
-      setTimeout(() => {
-        setRippleActive(false);
-      }, 50);
-    }, 800);
+  const onAnimate = (prop, finished, value, { attemptedValue }) => {
+    if (prop === 'translateX' && finished) {
+      if (ripplePhase === 'wiping_in' && attemptedValue === 0) {
+        toggleColorScheme();
+        // Give React a tiny tick to apply the theme while the screen is completely covered
+        setTimeout(() => setRipplePhase('wiping_out'), 50);
+      } else if (ripplePhase === 'wiping_out' && attemptedValue === -3000) {
+        setRipplePhase('idle');
+      }
+    }
   };
 
   // Calendar State
@@ -244,21 +249,19 @@ export default function CalendarScreen({ navigation }) {
       </View>
 
       <View className="flex-1 relative overflow-hidden">
-        {rippleTheme && (
+        {ripplePhase !== 'idle' && (
           <MotiView
-            from={{ translateX: 2000, translateY: -2000, rotate: '45deg', opacity: 1 }}
+            from={{ translateX: 3000, translateY: -3000, rotate: '45deg', opacity: 1 }}
             animate={{ 
-              translateX: rippleActive ? 0 : 2000, 
-              translateY: rippleActive ? 0 : -2000, 
+              translateX: ripplePhase === 'wiping_in' ? 0 : -3000, 
+              translateY: ripplePhase === 'wiping_in' ? 0 : 3000, 
               rotate: '45deg',
-              opacity: rippleActive ? 1 : 0 
+              opacity: 1
             }}
             transition={{
-              translateX: { type: 'timing', duration: rippleActive ? 800 : 0 },
-              translateY: { type: 'timing', duration: rippleActive ? 800 : 0 },
-              opacity: { type: 'timing', duration: rippleActive ? 0 : 150 },
-              rotate: { type: 'timing', duration: 0 }
+              type: 'timing', duration: 600
             }}
+            onDidAnimate={onAnimate}
             style={{
               position: 'absolute',
               top: '50%',

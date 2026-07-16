@@ -42,16 +42,16 @@ export default function LoginScreen({ navigation, onLoginSuccess }) {
   };
 
   return (
-    <View className="flex-1 justify-center items-center bg-zinc-900 px-6">
+    <View className="flex-1 justify-center items-center bg-slate-50 dark:bg-zinc-900 px-6">
       <View className="w-full max-w-sm">
-        <Text className="text-white text-3xl font-bold mb-2 text-center">Welcome Back</Text>
-        <Text className="text-zinc-400 text-center mb-8">Sign in to your Eventide account</Text>
+        <Text className="text-slate-900 dark:text-white text-3xl font-bold mb-2 text-center">Welcome Back</Text>
+        <Text className="text-slate-500 dark:text-zinc-400 text-center mb-8">Sign in to your Eventide account</Text>
         
         <View className="space-y-4 mb-8">
           <View>
-            <Text className="text-zinc-300 mb-2 font-semibold">Email</Text>
+            <Text className="text-slate-700 dark:text-zinc-300 mb-2 font-semibold">Email</Text>
             <TextInput
-              className="bg-zinc-800 text-white px-4 py-3 rounded-lg border border-zinc-700"
+              className="bg-white dark:bg-zinc-800 text-slate-900 dark:text-white px-4 py-3 rounded-lg border border-slate-200 dark:border-zinc-700"
               placeholder="Enter your email"
               placeholderTextColor="#71717a"
               value={email}
@@ -62,9 +62,9 @@ export default function LoginScreen({ navigation, onLoginSuccess }) {
           </View>
           
           <View className="mt-4">
-            <Text className="text-zinc-300 mb-2 font-semibold">Password</Text>
+            <Text className="text-slate-700 dark:text-zinc-300 mb-2 font-semibold">Password</Text>
             <TextInput
-              className="bg-zinc-800 text-white px-4 py-3 rounded-lg border border-zinc-700"
+              className="bg-white dark:bg-zinc-800 text-slate-900 dark:text-white px-4 py-3 rounded-lg border border-slate-200 dark:border-zinc-700"
               placeholder="Enter your password"
               placeholderTextColor="#71717a"
               value={password}
